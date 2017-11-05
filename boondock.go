@@ -9,7 +9,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
-	"sync"
 )
 
 type (
@@ -29,7 +28,6 @@ type (
 		component    string
 		isNamedParam bool
 		route        *Route
-		//methods      map[string]Handle
 	}
 )
 
@@ -74,11 +72,11 @@ func (n *node) traverse(components []string, params url.Values) (*node, string) 
 				}
 			}
 			if strings.HasSuffix(child.component, "*") && strings.HasPrefix(component, strings.TrimRight(child.component, "*")) {
-				logger.Log("* next %v", component)
+				logger.Log("* match child %v", component)
 				return child, component
 			}
 			if child.component == "*" {
-				logger.Log("* next %v", components[1:])
+				logger.Log("* match %v", components[1:])
 				//return child, component
 			}
 		}
@@ -115,7 +113,6 @@ func makeList() {
 	}
 	schemeList = map[string]map[string]*node{}
 	for _, item := range routeListRaw {
-		//routesList = append(routesList, makeRoute(item.Key, string(item.Value)))
 		route := makeRoute(item.Key, string(item.Value))
 		logger.Log("r: %v", route)
 		if schemeList[route.protocol] == nil {
@@ -127,8 +124,6 @@ func makeList() {
 		schemeList[route.protocol][route.host].addNode(route.path, route)
 	}
 }
-
-var wg sync.WaitGroup
 
 func main() {
 	makeList()
